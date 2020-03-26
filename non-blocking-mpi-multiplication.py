@@ -25,13 +25,15 @@ def line_and_second_matrix_multiplication(line, second_matrix):
 if my_rank != 0:
     line = [my_rank, line_and_second_matrix_multiplication(
         first_matrix[my_rank], second_matrix)]
-    comm.send(line, dest=0)
+    req = comm.isend(line, dest=0)
+    req.wait()
 else:
     result_matrix = [[] for i in range(0, num_of_processes)]
     result_matrix[0] = line_and_second_matrix_multiplication(
         first_matrix[0], second_matrix)
     for procid in range(1, num_of_processes):
-        line = comm.recv(source=procid)
+        req = comm.irecv(source=procid)
+        line = req.wait()
         result_matrix[line[0]] = line[1]
     print(result_matrix)
 
