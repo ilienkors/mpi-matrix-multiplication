@@ -5,10 +5,19 @@ comm = MPI.COMM_WORLD
 my_rank = comm.Get_rank()
 num_of_processes = comm.Get_size()
 
-first_matrix = [[randrange(10) for i in range(0, num_of_processes)]
-                for j in range(0, num_of_processes)]
-second_matrix = [[randrange(10) for i in range(0, num_of_processes)]
-                 for j in range(0, num_of_processes)]
+first_matrix = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [3, 2, 1, 9],
+    [4, 5, 6, 7],
+]
+
+second_matrix = [
+    [1, 2, 3, 4],
+    [1, 2, 3, 4],
+    [1, 2, 3, 4],
+    [1, 2, 3, 4],
+]
 
 
 def line_and_second_matrix_multiplication(line, second_matrix):
