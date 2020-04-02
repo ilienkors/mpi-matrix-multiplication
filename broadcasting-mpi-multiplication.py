@@ -4,20 +4,27 @@ comm = MPI.COMM_WORLD
 my_rank = comm.Get_rank()
 num_of_processes = comm.Get_size()
 
-first_matrix = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [3, 2, 1, 9],
-    [4, 5, 6, 7],
-]
 
-second_matrix = [
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-]
+if my_rank == 0:
+    first_matrix = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [3, 2, 1, 9],
+        [4, 5, 6, 7],
+    ]
 
+    second_matrix = [
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+        [1, 2, 3, 4],
+    ]
+else:
+    first_matrix = None
+    second_matrix = None
+
+first_matrix = comm.bcast(first_matrix, root=0)
+second_matrix = comm.bcast(second_matrix, root=0)
 
 def line_and_second_matrix_multiplication(line, second_matrix):
     matrix_size = len(line)
@@ -33,13 +40,15 @@ def line_and_second_matrix_multiplication(line, second_matrix):
 if my_rank != 0:
     line = [my_rank, line_and_second_matrix_multiplication(
         first_matrix[my_rank], second_matrix)]
-    comm.send(line, dest=0)
+    req = comm.isend(line, dest=0)
+    req.wait()
 else:
     result_matrix = [[] for i in range(0, num_of_processes)]
     result_matrix[0] = line_and_second_matrix_multiplication(
         first_matrix[0], second_matrix)
     for procid in range(1, num_of_processes):
-        line = comm.recv(source=procid)
+        req = comm.irecv(source=procid)
+        line = req.wait()
         result_matrix[line[0]] = line[1]
     print(result_matrix)
 

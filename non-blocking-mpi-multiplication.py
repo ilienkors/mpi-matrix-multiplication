@@ -1,5 +1,4 @@
 from mpi4py import MPI
-from random import randrange
 
 comm = MPI.COMM_WORLD
 my_rank = comm.Get_rank()
