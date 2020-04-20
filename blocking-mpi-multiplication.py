@@ -1,34 +1,17 @@
+import time
 from mpi4py import MPI
+from functions import line_and_second_matrix_multiplication
+from functions import get_matrix
 
 comm = MPI.COMM_WORLD
 my_rank = comm.Get_rank()
 num_of_processes = comm.Get_size()
 
-first_matrix = [
-    [1, 2, 3, 4],
-    [5, 6, 7, 8],
-    [3, 2, 1, 9],
-    [4, 5, 6, 7],
-]
+first_matrix = get_matrix(num_of_processes, 36.6)
+second_matrix = get_matrix(num_of_processes, 1.23)
 
-second_matrix = [
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-    [1, 2, 3, 4],
-]
-
-
-def line_and_second_matrix_multiplication(line, second_matrix):
-    matrix_size = len(line)
-    result_line = []
-    for i in range(matrix_size):
-        line_sum = 0
-        for j in range(matrix_size):
-            line_sum += line[j] * second_matrix[j][i]
-        result_line.append(line_sum)
-    return result_line
-
+if my_rank == 0:
+    time_start = time.time()
 
 if my_rank != 0:
     line = [my_rank, line_and_second_matrix_multiplication(
@@ -41,6 +24,9 @@ else:
     for procid in range(1, num_of_processes):
         line = comm.recv(source=procid)
         result_matrix[line[0]] = line[1]
-    print(result_matrix)
+    # print(result_matrix)
+
+if my_rank == 0:
+    print("Finished in %s seconds" % (time.time() - time_start))
 
 MPI.Finalize
